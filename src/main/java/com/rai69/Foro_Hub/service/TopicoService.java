@@ -82,22 +82,13 @@ public class TopicoService {
         return convertirAResponseDTO(topicoActualizado);
     }
     
-    /**
-     * Eliminar tópico por ID
-     * @param id ID del tópico a eliminar
-     */
     public void eliminarTopico(Integer id) {
         if (!topicoRepository.existsById(id)) {
             throw new RuntimeException("Tópico no encontrado con ID: " + id);
         }
         topicoRepository.deleteById(id);
     }
-    
-    /**
-     * Método privado para convertir Entity a DTO
-     * @param topico entidad TopicoModel
-     * @return TopicoResponseDTO
-     */
+
     private TopicoResponseDTO convertirAResponseDTO(TopicoModel topico) {
         TopicoResponseDTO dto = new TopicoResponseDTO();
         dto.setId(topico.getId());
@@ -106,7 +97,6 @@ public class TopicoService {
         dto.setFechaCreacion(topico.getFechaCreacion());
         dto.setStatus(topico.getStatus());
         
-        // Mapear autor (cuando implementes los repositorios)
         if (topico.getAutor() != null) {
             TopicoResponseDTO.AutorDTO autorDTO = new TopicoResponseDTO.AutorDTO();
             autorDTO.setId(topico.getAutor().getId());
@@ -114,7 +104,6 @@ public class TopicoService {
             dto.setAutor(autorDTO);
         }
         
-        // Mapear curso
         if (topico.getCurso() != null) {
             TopicoResponseDTO.CursoDTO cursoDTO = new TopicoResponseDTO.CursoDTO();
             cursoDTO.setId(topico.getCurso().getId());
@@ -123,7 +112,6 @@ public class TopicoService {
             dto.setCurso(cursoDTO);
         }
         
-        // Contar respuestas
         dto.setTotalRespuestas(topico.getRespuestas() != null ? topico.getRespuestas().size() : 0);
         
         return dto;

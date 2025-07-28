@@ -24,7 +24,6 @@ public class CursoModel {
     @Column(length = 100)
     private String categoria;
     
-    // Relación inversa (opcional)
     @OneToMany(mappedBy = "curso")
     private List<TopicoModel> topicos;
 }
