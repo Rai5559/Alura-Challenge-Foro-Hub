@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -29,6 +30,7 @@ public class TopicoService {
     @Autowired
     private CursoRepository cursoRepository;
 
+    @Transactional
     public TopicoResponseDTO crearTopico(TopicoRequestDTO requestDTO) {
         if (topicoRepository.existsByTituloAndMensaje(requestDTO.getTitulo(), requestDTO.getMensaje())) {
             throw new DuplicatedTopicException(
@@ -68,6 +70,7 @@ public class TopicoService {
         return topicos.map(this::convertirAResponseDTO);
     }
    
+    @Transactional
     public TopicoResponseDTO actualizarTopico(Integer id, TopicoRequestDTO requestDTO) {
         TopicoModel topico = topicoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Tópico no encontrado con ID: " + id));
@@ -82,6 +85,7 @@ public class TopicoService {
         return convertirAResponseDTO(topicoActualizado);
     }
     
+    @Transactional
     public void eliminarTopico(Integer id) {
         if (!topicoRepository.existsById(id)) {
             throw new RuntimeException("Tópico no encontrado con ID: " + id);
