@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Usuario {
+public class UsuarioModel {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,12 +29,12 @@ public class Usuario {
     
     @ManyToOne
     @JoinColumn(name = "perfiles")
-    private Perfil perfiles;
+    private PerfilModel perfiles;
     
     // Relaciones inversas (opcionales)
     @OneToMany(mappedBy = "autor")
-    private List<Topico> topicos;
+    private List<TopicoModel> topicos;
     
     @OneToMany(mappedBy = "autor")
-    private List<Respuesta> respuestas;
+    private List<RespuestaModel> respuestas;
 }

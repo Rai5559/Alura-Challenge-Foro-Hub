@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "Perfil")
+@Table(name = "Curso")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Perfil {
+public class CursoModel {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,7 +21,10 @@ public class Perfil {
     @Column(nullable = false, length = 100)
     private String nombre;
     
+    @Column(length = 100)
+    private String categoria;
+    
     // Relación inversa (opcional)
-    @OneToMany(mappedBy = "perfiles")
-    private List<Usuario> usuarios;
+    @OneToMany(mappedBy = "curso")
+    private List<TopicoModel> topicos;
 }
