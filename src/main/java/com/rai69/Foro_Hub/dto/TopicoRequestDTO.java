@@ -19,8 +19,10 @@ public class TopicoRequestDTO {
     @NotNull(message = "El autor es obligatorio")
     private Integer autorId;
     
-    @NotNull(message = "El curso es obligatorio")
-    private Integer cursoId;
+    @NotBlank(message = "El nombre del curso es obligatorio")
+    private String cursoNombre;
+
+    private String categoria; 
     
     private String status;
 }

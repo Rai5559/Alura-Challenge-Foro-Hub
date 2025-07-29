@@ -28,7 +28,7 @@ public class TopicoService {
     private UsuarioRepository usuarioRepository;
     
     @Autowired
-    private CursoRepository cursoRepository;
+    private CursoService cursoService;
 
     @Transactional
     public TopicoResponseDTO crearTopico(TopicoRequestDTO requestDTO) {
@@ -40,11 +40,9 @@ public class TopicoService {
         UsuarioModel autor = usuarioRepository.findById(requestDTO.getAutorId())
             .orElseThrow(() -> new EntityNotFoundException(
                 "Usuario no encontrado con ID: " + requestDTO.getAutorId()));
-        
-        CursoModel curso = cursoRepository.findById(requestDTO.getCursoId())
-            .orElseThrow(() -> new EntityNotFoundException(
-                "Curso no encontrado con ID: " + requestDTO.getCursoId()));
-        
+
+        CursoModel curso = cursoService.obtenerOCrearCursoModel(requestDTO.getCursoNombre(), requestDTO.getCategoria());
+
         TopicoModel topico = new TopicoModel();
         topico.setTitulo(requestDTO.getTitulo());
         topico.setMensaje(requestDTO.getMensaje());
