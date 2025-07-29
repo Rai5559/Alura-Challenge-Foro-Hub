@@ -3,12 +3,10 @@ package com.rai69.Foro_Hub.service;
 import com.rai69.Foro_Hub.dto.TopicoRequestDTO;
 import com.rai69.Foro_Hub.dto.TopicoResponseDTO;
 import com.rai69.Foro_Hub.exception.DuplicatedTopicException;
-import com.rai69.Foro_Hub.exception.EntityNotFoundException;
 import com.rai69.Foro_Hub.model.TopicoModel;
 import com.rai69.Foro_Hub.model.UsuarioModel;
 import com.rai69.Foro_Hub.model.CursoModel;
 import com.rai69.Foro_Hub.repository.TopicoRepository;
-import com.rai69.Foro_Hub.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +22,7 @@ public class TopicoService {
     private TopicoRepository topicoRepository;
     
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private AutorService autorService;
     
     @Autowired
     private CursoService cursoService;
@@ -36,9 +34,7 @@ public class TopicoService {
                 "Ya existe un tópico con el mismo título y mensaje");
         }
         
-        UsuarioModel autor = usuarioRepository.findById(requestDTO.getAutorId())
-            .orElseThrow(() -> new EntityNotFoundException(
-                "Usuario no encontrado con ID: " + requestDTO.getAutorId()));
+        UsuarioModel autor = autorService.obtenerAutorModel(requestDTO.getAutorId());
 
         CursoModel curso = cursoService.obtenerOCrearCursoModel(requestDTO.getCursoNombre(), requestDTO.getCategoria());
 
