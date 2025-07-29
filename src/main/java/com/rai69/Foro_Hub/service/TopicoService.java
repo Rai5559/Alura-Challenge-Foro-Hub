@@ -9,7 +9,6 @@ import com.rai69.Foro_Hub.model.UsuarioModel;
 import com.rai69.Foro_Hub.model.CursoModel;
 import com.rai69.Foro_Hub.repository.TopicoRepository;
 import com.rai69.Foro_Hub.repository.UsuarioRepository;
-import com.rai69.Foro_Hub.repository.CursoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
