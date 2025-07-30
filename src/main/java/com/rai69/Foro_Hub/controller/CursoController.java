@@ -18,16 +18,33 @@ import com.rai69.Foro_Hub.dto.CursoDTO;
 import com.rai69.Foro_Hub.exception.EntityNotFoundException;
 import com.rai69.Foro_Hub.service.CursoService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/curso")
+@RequestMapping("/cursos")
+@Tag(name = "Cursos", description = "Gestión de cursos del foro")
 public class CursoController {
     
     @Autowired
     private CursoService cursoService;
 
     @PostMapping
+    @Operation(summary = "Crear curso", description = "Crea un nuevo curso en el sistema (requiere rol ADMIN o MODERADOR)")
+    @SecurityRequirement(name = "Bearer Authentication")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Curso creado exitosamente",
+                content = @Content(mediaType = "application/json", 
+                schema = @Schema(implementation = CursoDTO.class))),
+        @ApiResponse(responseCode = "404", description = "Entidad no encontrada"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
     public ResponseEntity<CursoDTO> crearCurso(
         @Valid @RequestBody CursoDTO cursoDTO){
         try {

@@ -7,6 +7,12 @@ import com.rai69.Foro_Hub.dto.RegistroRequestDTO;
 import com.rai69.Foro_Hub.dto.RegistroResponseDTO;
 import com.rai69.Foro_Hub.model.UsuarioModel;
 import com.rai69.Foro_Hub.service.UsuarioService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Autenticación", description = "Endpoints para autenticación y registro de usuarios")
 public class AuthController {
 
     @Autowired
@@ -33,6 +40,13 @@ public class AuthController {
     private JwtUtil jwtUtil;
 
     @PostMapping("/login")
+    @Operation(summary = "Iniciar sesión", description = "Autentica un usuario y retorna un token JWT")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Login exitoso",
+                content = @Content(mediaType = "application/json", 
+                schema = @Schema(implementation = JwtResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Credenciales incorrectas")
+    })
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequestDTO loginRequest) {
         try {
             Authentication authentication = authenticationManager.authenticate(
@@ -53,6 +67,13 @@ public class AuthController {
     }
 
     @PostMapping("/registro")
+    @Operation(summary = "Registrar usuario", description = "Registra un nuevo usuario en el sistema")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Registro exitoso",
+                content = @Content(mediaType = "application/json", 
+                schema = @Schema(implementation = RegistroResponseDTO.class))),
+        @ApiResponse(responseCode = "400", description = "Error en el registro")
+    })
     public ResponseEntity<?> registro(@Valid @RequestBody RegistroRequestDTO registroRequest) {
         try {
             RegistroResponseDTO respuesta = usuarioService.registrarUsuario(registroRequest);
