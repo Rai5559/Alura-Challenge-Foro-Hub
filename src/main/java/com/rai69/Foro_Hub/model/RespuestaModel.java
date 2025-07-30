@@ -6,42 +6,34 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
-@Table(name = "Topico")
+@Table(name = "Respuesta")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Topico {
+public class RespuestaModel {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     
-    @Column(nullable = false, length = 200)
-    private String titulo;
-    
     @Column(nullable = false, columnDefinition = "TEXT")
     private String mensaje;
+    
+    @ManyToOne
+    @JoinColumn(name = "topico")
+    private TopicoModel topico;
     
     @Column(name = "fechaCreacion")
     private LocalDateTime fechaCreacion;
     
-    @Column(length = 50)
-    private String status;
-    
     @ManyToOne
     @JoinColumn(name = "autor")
-    private Usuario autor;
+    private UsuarioModel autor;
     
-    @ManyToOne
-    @JoinColumn(name = "curso")
-    private Curso curso;
-    
-    // Relación inversa (opcional)
-    @OneToMany(mappedBy = "topico", cascade = CascadeType.ALL)
-    private List<Respuesta> respuestas;
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean solucion = false;
     
     @PrePersist
     protected void onCreate() {
