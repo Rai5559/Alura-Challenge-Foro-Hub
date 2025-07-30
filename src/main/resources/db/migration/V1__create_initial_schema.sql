@@ -43,7 +43,7 @@ CREATE TABLE respuesta (
 );
 
 -- Insertar perfiles por defecto
-INSERT INTO perfil (nombre) VALUES ('ADMIN'), ('USER');
+INSERT INTO perfil (nombre) VALUES ('ADMIN'), ('MODERADOR'), ('USER');
 
 -- Crear índices para mejorar performance
 CREATE INDEX idx_topico_autor ON topico(autor);
