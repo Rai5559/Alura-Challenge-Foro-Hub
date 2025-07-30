@@ -16,14 +16,14 @@ public class TopicoResponseDTO {
     private String mensaje;
     private LocalDateTime fechaCreacion;
     private String status;
-    private AutorDTO autor;
+    private UsuarioDTO usuario;
     private CursoDTO curso;
     private Integer totalRespuestas;
     
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class AutorDTO {
+    public static class UsuarioDTO {
         private Integer id;
         private String nombre;
     }

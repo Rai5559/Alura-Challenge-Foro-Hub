@@ -16,8 +16,8 @@ public class TopicoRequestDTO {
     @Size(min = 10, message = "El mensaje debe tener al menos 10 caracteres")
     private String mensaje;
     
-    @NotNull(message = "El autor es obligatorio")
-    private Integer autorId;
+    @NotNull(message = "El usuario es obligatorio")
+    private Integer usuarioId;
     
     @NotBlank(message = "El nombre del curso es obligatorio")
     private String cursoNombre;

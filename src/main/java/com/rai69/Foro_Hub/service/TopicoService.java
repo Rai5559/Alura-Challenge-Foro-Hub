@@ -22,7 +22,7 @@ public class TopicoService {
     private TopicoRepository topicoRepository;
     
     @Autowired
-    private AutorService autorService;
+    private UsuarioService usuarioService;
     
     @Autowired
     private CursoService cursoService;
@@ -34,7 +34,7 @@ public class TopicoService {
                 "Ya existe un tópico con el mismo título y mensaje");
         }
         
-        UsuarioModel autor = autorService.obtenerAutorModel(requestDTO.getAutorId());
+        UsuarioModel autor = usuarioService.obtenerUsuarioModel(requestDTO.getUsuarioId());
 
         CursoModel curso = cursoService.obtenerOCrearCursoModel(requestDTO.getCursoNombre(), requestDTO.getCategoria());
 
@@ -95,10 +95,10 @@ public class TopicoService {
         dto.setStatus(topico.getStatus());
         
         if (topico.getAutor() != null) {
-            TopicoResponseDTO.AutorDTO autorDTO = new TopicoResponseDTO.AutorDTO();
-            autorDTO.setId(topico.getAutor().getId());
-            autorDTO.setNombre(topico.getAutor().getNombre());
-            dto.setAutor(autorDTO);
+            TopicoResponseDTO.UsuarioDTO usuarioDTO = new TopicoResponseDTO.UsuarioDTO();
+            usuarioDTO.setId(topico.getAutor().getId());
+            usuarioDTO.setNombre(topico.getAutor().getNombre());
+            dto.setUsuario(usuarioDTO);
         }
         
         if (topico.getCurso() != null) {
