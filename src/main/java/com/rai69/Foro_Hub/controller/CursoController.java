@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rai69.Foro_Hub.dto.CursoDTO;
-import com.rai69.Foro_Hub.exception.EntityNotFoundException;
 import com.rai69.Foro_Hub.service.CursoService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -126,15 +125,8 @@ public class CursoController {
             )
         )
         @Valid @RequestBody CursoDTO cursoDTO){
-        try {
-            CursoDTO nuevoCurso = cursoService.crearCurso(cursoDTO);
-            return ResponseEntity.ok(nuevoCurso);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        CursoDTO nuevoCurso = cursoService.crearCurso(cursoDTO);
+        return ResponseEntity.ok(nuevoCurso);
     }
     
     @GetMapping("/{nombre}")
@@ -191,17 +183,11 @@ public class CursoController {
             example = "Spring Boot Avanzado"
         )
         @PathVariable String nombre) {
-        try {
-            CursoDTO curso = cursoService.obtenerCursoPorNombre(nombre);
-            if (curso == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-            return ResponseEntity.ok(curso);
-        } catch (EntityNotFoundException e) {
+        CursoDTO curso = cursoService.obtenerCursoPorNombre(nombre);
+        if (curso == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+        return ResponseEntity.ok(curso);
     }
 
     @GetMapping
@@ -270,12 +256,8 @@ public class CursoController {
             example = "page=0&size=10"
         )
         @PageableDefault(size = 10, page = 0) Pageable pageable) {
-        try {
-            Page<CursoDTO> cursos = cursoService.listarCursos(pageable);
-            return ResponseEntity.ok(cursos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Page<CursoDTO> cursos = cursoService.listarCursos(pageable);
+        return ResponseEntity.ok(cursos);
     }
 
     @PutMapping("/{nombre}")
@@ -375,18 +357,12 @@ public class CursoController {
             )
         )
         @Valid @RequestBody CursoDTO cursoDTO) {
-        try {
-            CursoDTO cursoExistente = cursoService.obtenerCursoPorNombre(nombre);
-            if (cursoExistente == null) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            }
-            CursoDTO cursoActualizado = cursoService.actualizarCurso(cursoDTO);
-            return ResponseEntity.ok(cursoActualizado);
-        } catch (EntityNotFoundException e) {
+        CursoDTO cursoExistente = cursoService.obtenerCursoPorNombre(nombre);
+        if (cursoExistente == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+        CursoDTO cursoActualizado = cursoService.actualizarCurso(cursoDTO);
+        return ResponseEntity.ok(cursoActualizado);
     }
 
 }

@@ -23,8 +23,8 @@ Authorization: Bearer <tu_jwt_token>
 
 ```json
 {
-    "email": "usuario@example.com",
-    "password": "contraseña123"
+    "correoElectronico": "usuario@example.com",
+    "contrasena": "contraseña123"
 }
 ```
 
@@ -32,16 +32,8 @@ Authorization: Bearer <tu_jwt_token>
 ```json
 {
     "token": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c3VhcmlvQGV4YW1wbGUuY29tIiwiaWF0IjoxNjM5NTUwNDAwLCJleHAiOjE2Mzk2MzY4MDB9.signature",
-    "tipo": "Bearer",
-    "usuario": {
-        "id": 1,
-        "nombre": "Usuario Test",
-        "email": "usuario@example.com",
-        "perfil": {
-            "id": 3,
-            "nombre": "USER"
-        }
-    }
+    "correoElectronico": "usuario@example.com",
+    "nombre": "Usuario Test"
 }
 ```
 
@@ -60,15 +52,27 @@ Authorization: Bearer <tu_jwt_token>
 ```json
 {
     "nombre": "Carlos Rodriguez",
-    "email": "carlos@example.com",
-    "password": "password123"
+    "correoElectronico": "carlos@example.com",
+    "contrasena": "password123",
+    "perfilId": 3
 }
 ```
 
 **Respuestas**:
 - **201 Created**: Usuario registrado exitosamente
-- **400 Bad Request**: Datos inválidos
+- **400 Bad Request**: Datos inválidos o falta información requerida
 - **409 Conflict**: Email ya registrado
+
+**Ejemplo 409 - Email duplicado:**
+```json
+{
+    "error": "Conflict",
+    "message": "Ya existe un usuario registrado con este email",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 409,
+    "path": "/auth/registro"
+}
+```
 
 #### **Iniciar Sesión**
 **POST** `/auth/login`
@@ -78,8 +82,98 @@ Authorization: Bearer <tu_jwt_token>
 **Request Body**:
 ```json
 {
-    "email": "carlos@example.com",
-    "password": "password123"
+    "correoElectronico": "carlos@example.com",
+    "contrasena": "password123"
+}
+```
+
+**Respuestas**:
+- **200 OK**: Login exitoso con token JWT
+- **401 Unauthorized**: Credenciales incorrectas
+- **500 Internal Server Error**: Error interno
+
+**Ejemplo 401 - Credenciales incorrectas:**
+```json
+{
+    "error": "Unauthorized",
+    "message": "Credenciales incorrectas. Verifica tu email y contraseña",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 401,
+    "path": "/auth/login"
+}
+```
+
+---
+
+## 🔧 **MANEJO CENTRALIZADO DE ERRORES**
+
+La API utiliza un sistema de manejo de errores centralizado que garantiza respuestas consistentes:
+
+### **Estructura de Error Estándar**
+```json
+{
+    "error": "Tipo de Error HTTP",
+    "message": "Descripción detallada del error",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 400,
+    "path": "/endpoint/que/genero/error"
+}
+```
+
+### **Tipos de Error Comunes**
+
+#### **400 - Bad Request**
+```json
+{
+    "error": "Bad Request",
+    "message": "Datos de entrada inválidos: {nombre=El nombre es requerido}",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 400,
+    "path": "/topicos"
+}
+```
+
+#### **401 - Unauthorized**
+```json
+{
+    "error": "Unauthorized",
+    "message": "Token JWT requerido o inválido",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 401,
+    "path": "/topicos"
+}
+```
+
+#### **403 - Forbidden**
+```json
+{
+    "error": "Forbidden",
+    "message": "No tienes permisos para realizar esta operación",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 403,
+    "path": "/topicos/1"
+}
+```
+
+#### **404 - Not Found**
+```json
+{
+    "error": "Not Found",
+    "message": "No se encontró un tópico con ID: 999",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 404,
+    "path": "/topicos/999"
+}
+```
+
+#### **409 - Conflict**
+```json
+{
+    "error": "Conflict",
+    "message": "Ya existe un tópico con el mismo título y autor",
+    "timestamp": "2024-12-23T10:30:00Z",
+    "status": 409,
+    "path": "/topicos"
 }
 ```
 
@@ -106,6 +200,7 @@ Authorization: Bearer <tu_jwt_token>
 **Respuestas**:
 - **201 Created**: Tópico creado exitosamente
 - **400 Bad Request**: Datos inválidos
+- **401 Unauthorized**: Token JWT requerido
 - **409 Conflict**: Tópico duplicado (mismo título y autor)
 
 #### **Obtener Tópico por ID**
@@ -292,66 +387,100 @@ const loginResponse = await fetch('/auth/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-        email: 'usuario@example.com',
-        password: 'password123'
+        correoElectronico: 'usuario@example.com',
+        contrasena: 'password123'
     })
 });
+
+if (!loginResponse.ok) {
+    const error = await loginResponse.json();
+    console.error('Error login:', error.message);
+    return;
+}
+
 const { token } = await loginResponse.json();
 
 // Usar token en requests
 const topicsResponse = await fetch('/topicos', {
     headers: { 'Authorization': `Bearer ${token}` }
 });
+
+if (!topicsResponse.ok) {
+    const error = await topicsResponse.json();
+    console.error('Error:', error.message);
+}
 ```
 
-### cURL
-```bash
-# Login
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"usuario@example.com","password":"password123"}'
-
-# Usar token
-curl -X GET http://localhost:8080/topicos \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
-```
-
-### Python/Requests
+### Python/Requests con manejo de errores
 ```python
 import requests
 
-# Login
-login_response = requests.post('/auth/login', json={
-    'email': 'usuario@example.com',
-    'password': 'password123'
-})
-token = login_response.json()['token']
+def login(email, password):
+    response = requests.post('/auth/login', json={
+        'correoElectronico': email,
+        'contrasena': password
+    })
+    
+    if response.status_code == 401:
+        error = response.json()
+        print(f"Error de login: {error['message']}")
+        return None
+    elif response.status_code != 200:
+        error = response.json()
+        print(f"Error inesperado: {error['message']}")
+        return None
+    
+    return response.json()['token']
 
-# Headers con token
-headers = {'Authorization': f'Bearer {token}'}
-topics = requests.get('/topicos', headers=headers)
+def create_topic(token, title, message, author_id, course_id):
+    headers = {'Authorization': f'Bearer {token}'}
+    data = {
+        'titulo': title,
+        'mensaje': message,
+        'autor': author_id,
+        'curso': course_id
+    }
+    
+    response = requests.post('/topicos', json=data, headers=headers)
+    
+    if response.status_code == 409:
+        error = response.json()
+        print(f"Tópico duplicado: {error['message']}")
+    elif response.status_code == 401:
+        error = response.json()
+        print(f"Token inválido: {error['message']}")
+    elif response.status_code == 201:
+        print("Tópico creado exitosamente!")
+        return response.json()
+    else:
+        error = response.json()
+        print(f"Error: {error['message']}")
+    
+    return None
 ```
 
 ---
 
 ## ⚠️ **CONSIDERACIONES IMPORTANTES**
 
-1. **Tokens JWT**: Expiran en 24 horas, requieren renovación
-2. **Rate Limiting**: Implementar en el cliente para evitar spam
-3. **Validación**: Todos los campos son validados en el servidor
-4. **Paginación**: Usar parámetros `page` y `size` para listas grandes
-5. **CORS**: Configurado para desarrollo en localhost
-6. **HTTPS**: Usar en producción para seguridad
+1. **Manejo de Errores**: Todos los errores siguen el formato estándar JSON
+2. **Tokens JWT**: Expiran en 24 horas, requieren renovación
+3. **Validación**: Los errores de validación incluyen detalles específicos
+4. **Códigos HTTP**: Usar códigos de estado para lógica de control
+5. **Mensajes**: Los mensajes de error son descriptivos y orientados al usuario
+6. **CORS**: Configurado para desarrollo en localhost
+7. **HTTPS**: Usar en producción para seguridad
 
 ---
 
 ## 🐛 **DEPURACIÓN Y LOGS**
 
-- Consulta los logs del servidor para errores 500
-- Valida tokens JWT en [jwt.io](https://jwt.io)
-- Usa herramientas como Postman o Insomnia para pruebas
-- Revisa la consola de Swagger UI para ejemplos en vivo
+- **Errores 500**: Consulta los logs del servidor
+- **Errores de validación**: Revisa el campo "message" en la respuesta
+- **Tokens JWT**: Valida en [jwt.io](https://jwt.io)
+- **Swagger UI**: Usa para pruebas interactivas
+- **Códigos de estado**: Implementa lógica de manejo basada en HTTP status
 
 ---
 
-**📞 Soporte**: Si encuentras problemas, consulta la documentación interactiva en Swagger UI o contacta al equipo de desarrollo.
+**📞 Soporte**: Si encuentras problemas, todos los errores ahora incluyen información detallada. Consulta la documentación interactiva en Swagger UI o contacta al equipo de desarrollo.

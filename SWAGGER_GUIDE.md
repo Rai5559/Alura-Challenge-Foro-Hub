@@ -8,8 +8,8 @@ Tu aplicación Foro Hub ahora incluye documentación interactiva de la API usand
 
 Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación interactiva en:
 
-- **Swagger UI**: http://localhost:8081/swagger-ui.html
-- **Documentación JSON**: http://localhost:8081/v3/api-docs
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **Documentación JSON**: http://localhost:8080/v3/api-docs
 
 ### 🔐 Autenticación JWT en Swagger
 

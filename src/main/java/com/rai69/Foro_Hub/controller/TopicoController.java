@@ -2,8 +2,6 @@ package com.rai69.Foro_Hub.controller;
 
 import com.rai69.Foro_Hub.dto.TopicoRequestDTO;
 import com.rai69.Foro_Hub.dto.TopicoResponseDTO;
-import com.rai69.Foro_Hub.exception.DuplicatedTopicException;
-import com.rai69.Foro_Hub.exception.EntityNotFoundException;
 import com.rai69.Foro_Hub.service.TopicoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -101,19 +99,8 @@ public class TopicoController {
         )
         @Valid @RequestBody TopicoRequestDTO topicoRequestDTO) {
         
-        try {
-            TopicoResponseDTO response = topicoService.crearTopico(topicoRequestDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            
-        } catch (DuplicatedTopicException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        TopicoResponseDTO response = topicoService.crearTopico(topicoRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/{id}")
@@ -169,14 +156,8 @@ public class TopicoController {
             example = "1"
         )
         @PathVariable Integer id) {
-        try {
-            TopicoResponseDTO response = topicoService.obtenerTopico(id);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        TopicoResponseDTO response = topicoService.obtenerTopico(id);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -251,12 +232,8 @@ public class TopicoController {
         )
         @PageableDefault(size = 10, page = 0, sort = "fechaCreacion", direction = Sort.Direction.ASC) 
         Pageable pageable) {
-        try {
-            Page<TopicoResponseDTO> response = topicoService.listarTopicos(pageable);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        Page<TopicoResponseDTO> response = topicoService.listarTopicos(pageable);
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
@@ -334,14 +311,8 @@ public class TopicoController {
         )
         @Valid @RequestBody TopicoRequestDTO topicoRequestDTO) {
         
-        try {
-            TopicoResponseDTO response = topicoService.actualizarTopico(id, topicoRequestDTO);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        TopicoResponseDTO response = topicoService.actualizarTopico(id, topicoRequestDTO);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -380,13 +351,7 @@ public class TopicoController {
             example = "1"
         )
         @PathVariable Integer id) {
-        try {
-            topicoService.eliminarTopico(id);
-            return ResponseEntity.noContent().build();
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
+        topicoService.eliminarTopico(id);
+        return ResponseEntity.noContent().build();
     }
 }

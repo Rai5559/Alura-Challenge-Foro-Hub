@@ -1,6 +1,7 @@
 package com.rai69.Foro_Hub.controller;
 
 import com.rai69.Foro_Hub.config.JwtUtil;
+import com.rai69.Foro_Hub.dto.ErrorResponseDTO;
 import com.rai69.Foro_Hub.dto.JwtResponseDTO;
 import com.rai69.Foro_Hub.dto.LoginRequestDTO;
 import com.rai69.Foro_Hub.dto.RegistroRequestDTO;
@@ -13,8 +14,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -65,19 +68,44 @@ public class AuthController {
             )
         ),
         @ApiResponse(
-            responseCode = "400", 
-            description = "❌ Credenciales incorrectas - Email o contraseña inválidos",
+            responseCode = "401", 
+            description = "🔐 Credenciales incorrectas - Email o contraseña inválidos",
             content = @Content(
-                mediaType = "text/plain",
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponseDTO.class),
                 examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
                     name = "Error de credenciales",
-                    value = "Credenciales incorrectas"
+                    value = """
+                    {
+                        "error": "Unauthorized",
+                        "message": "Credenciales incorrectas. Verifica tu email y contraseña",
+                        "timestamp": "2024-12-23T10:30:00Z",
+                        "status": 401,
+                        "path": "/auth/login"
+                    }
+                    """
                 )
             )
         ),
         @ApiResponse(
             responseCode = "500",
-            description = "⚠️ Error interno del servidor"
+            description = "⚠️ Error interno del servidor",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    name = "Error interno",
+                    value = """
+                    {
+                        "error": "Internal Server Error",
+                        "message": "Error interno del servidor durante la autenticación",
+                        "timestamp": "2024-12-23T10:30:00Z",
+                        "status": 500,
+                        "path": "/auth/login"
+                    }
+                    """
+                )
+            )
         )
     })
     public ResponseEntity<?> login(
@@ -93,22 +121,17 @@ public class AuthController {
             """
         )
         @Valid @RequestBody LoginRequestDTO loginRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getCorreoElectronico(), 
-                    loginRequest.getContrasena()
-                )
-            );
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                loginRequest.getCorreoElectronico(), 
+                loginRequest.getContrasena()
+            )
+        );
 
-            UsuarioModel usuario = (UsuarioModel) authentication.getPrincipal();
-            String jwt = jwtUtil.generateToken(usuario);
+        UsuarioModel usuario = (UsuarioModel) authentication.getPrincipal();
+        String jwt = jwtUtil.generateToken(usuario);
 
-            return ResponseEntity.ok(new JwtResponseDTO(jwt, usuario.getCorreoElectronico(), usuario.getNombre()));
-            
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body("Credenciales incorrectas");
-        }
+        return ResponseEntity.ok(new JwtResponseDTO(jwt, usuario.getCorreoElectronico(), usuario.getNombre()));
     }
 
     @PostMapping("/registro")
@@ -119,7 +142,7 @@ public class AuthController {
     )
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "201", 
             description = "✅ Usuario registrado exitosamente",
             content = @Content(
                 mediaType = "application/json", 
@@ -139,18 +162,63 @@ public class AuthController {
         ),
         @ApiResponse(
             responseCode = "400", 
-            description = "❌ Error en el registro",
+            description = "❌ Datos de entrada inválidos",
             content = @Content(
-                mediaType = "text/plain",
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponseDTO.class),
                 examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
                     name = "Error de validación",
-                    value = "Error en el registro: El correo electrónico ya está registrado"
+                    value = """
+                    {
+                        "error": "Bad Request",
+                        "message": "El nombre es requerido",
+                        "timestamp": "2024-12-23T10:30:00Z",
+                        "status": 400,
+                        "path": "/auth/registro"
+                    }
+                    """
+                )
+            )
+        ),
+        @ApiResponse(
+            responseCode = "409", 
+            description = "⚠️ Email ya registrado",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    name = "Email duplicado",
+                    value = """
+                    {
+                        "error": "Conflict",
+                        "message": "Ya existe un usuario registrado con este email",
+                        "timestamp": "2024-12-23T10:30:00Z",
+                        "status": 409,
+                        "path": "/auth/registro"
+                    }
+                    """
                 )
             )
         ),
         @ApiResponse(
             responseCode = "500",
-            description = "⚠️ Error interno del servidor"
+            description = "⚠️ Error interno del servidor",
+            content = @Content(
+                mediaType = "application/json",
+                schema = @Schema(implementation = ErrorResponseDTO.class),
+                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
+                    name = "Error interno",
+                    value = """
+                    {
+                        "error": "Internal Server Error",
+                        "message": "Error interno del servidor durante el registro",
+                        "timestamp": "2024-12-23T10:30:00Z",
+                        "status": 500,
+                        "path": "/auth/registro"
+                    }
+                    """
+                )
+            )
         )
     })
     public ResponseEntity<?> registro(
@@ -168,12 +236,7 @@ public class AuthController {
             """
         )
         @Valid @RequestBody RegistroRequestDTO registroRequest) {
-        try {
-            RegistroResponseDTO respuesta = usuarioService.registrarUsuario(registroRequest);
-            return ResponseEntity.ok(respuesta);
-            
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error en el registro: " + e.getMessage());
-        }
+        RegistroResponseDTO respuesta = usuarioService.registrarUsuario(registroRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(respuesta);
     }
 }
