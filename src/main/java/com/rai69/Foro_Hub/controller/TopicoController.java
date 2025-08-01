@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -218,20 +219,35 @@ public class TopicoController {
     })
     public ResponseEntity<Page<TopicoResponseDTO>> listarTopicos(
         @io.swagger.v3.oas.annotations.Parameter(
-            description = "Parámetros de paginación y ordenamiento",
-            examples = {
-                @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    name = "Primera página",
-                    value = "page=0&size=10&sort=fechaCreacion,asc"
-                ),
-                @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    name = "Ordenar por título",
-                    value = "page=0&size=5&sort=titulo,desc"
-                )
-            }
+            description = "Número de página (0-indexado)",
+            example = "0"
         )
-        @PageableDefault(size = 10, page = 0, sort = "fechaCreacion", direction = Sort.Direction.ASC) 
-        Pageable pageable) {
+        @RequestParam(defaultValue = "0") int page,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Tamaño de página (número de elementos por página)",
+            example = "10"
+        )
+        @RequestParam(defaultValue = "10") int size,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Campo de ordenamiento. Ejemplo: 'fechaCreacion', 'titulo', 'estado'",
+            example = "fechaCreacion"
+        )
+        @RequestParam(defaultValue = "fechaCreacion") String sort,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Dirección del ordenamiento. Valores: 'asc' o 'desc'",
+            example = "asc"
+        )
+        @RequestParam(defaultValue = "asc") String direction) {
+        
+        Sort.Direction sortDirection = 
+            direction.equalsIgnoreCase("desc") ? 
+            Sort.Direction.DESC : 
+            Sort.Direction.ASC;
+            
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
         Page<TopicoResponseDTO> response = topicoService.listarTopicos(pageable);
         return ResponseEntity.ok(response);
     }

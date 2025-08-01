@@ -3,6 +3,8 @@ package com.rai69.Foro_Hub.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rai69.Foro_Hub.dto.CursoDTO;
@@ -252,10 +255,37 @@ public class CursoController {
     })
     public ResponseEntity<Page<CursoDTO>> listarCursos(
         @io.swagger.v3.oas.annotations.Parameter(
-            description = "Parámetros de paginación. Ejemplo: page=0&size=10&sort=nombre,asc",
-            example = "page=0&size=10"
+            description = "Número de página (0-indexado)",
+            example = "0"
         )
-        @PageableDefault(size = 10, page = 0) Pageable pageable) {
+        @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Tamaño de página (número de elementos por página)",
+            example = "10"
+        )
+        @org.springframework.web.bind.annotation.RequestParam(defaultValue = "10") int size,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Campo de ordenamiento. Ejemplo: 'nombre' o 'categoria'",
+            example = "nombre"
+        )
+        @org.springframework.web.bind.annotation.RequestParam(defaultValue = "nombre") String sort,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Dirección del ordenamiento. Valores: 'asc' o 'desc'",
+            example = "asc"
+        )
+        @org.springframework.web.bind.annotation.RequestParam(defaultValue = "asc") String direction) {
+        
+        org.springframework.data.domain.Sort.Direction sortDirection = 
+            direction.equalsIgnoreCase("desc") ? 
+            org.springframework.data.domain.Sort.Direction.DESC : 
+            org.springframework.data.domain.Sort.Direction.ASC;
+            
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+            page, size, org.springframework.data.domain.Sort.by(sortDirection, sort));
+            
         Page<CursoDTO> cursos = cursoService.listarCursos(pageable);
         return ResponseEntity.ok(cursos);
     }

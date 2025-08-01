@@ -5,6 +5,7 @@ import com.rai69.Foro_Hub.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -172,11 +173,35 @@ public class UsuarioController {
     })
     public ResponseEntity<Page<UsuarioResponseDTO>> listarUsuarios(
         @io.swagger.v3.oas.annotations.Parameter(
-            description = "Parámetros de paginación y ordenamiento. Por defecto: page=0, size=10, sort=nombre,asc",
-            example = "page=0&size=10&sort=nombre,asc"
+            description = "Número de página (0-indexado)",
+            example = "0"
         )
-        @PageableDefault(size = 10, page = 0, sort = "nombre", direction = Sort.Direction.ASC) 
-        Pageable pageable) {
+        @RequestParam(defaultValue = "0") int page,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Tamaño de página (número de elementos por página)",
+            example = "10"
+        )
+        @RequestParam(defaultValue = "10") int size,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Campo de ordenamiento. Ejemplo: 'nombre', 'correoElectronico'",
+            example = "nombre"
+        )
+        @RequestParam(defaultValue = "nombre") String sort,
+        
+        @io.swagger.v3.oas.annotations.Parameter(
+            description = "Dirección del ordenamiento. Valores: 'asc' o 'desc'",
+            example = "asc"
+        )
+        @RequestParam(defaultValue = "asc") String direction) {
+        
+        Sort.Direction sortDirection = 
+            direction.equalsIgnoreCase("desc") ? 
+            Sort.Direction.DESC : 
+            Sort.Direction.ASC;
+            
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
         Page<UsuarioResponseDTO> usuarios = usuarioService.listarUsuarios(pageable);
         return ResponseEntity.ok(usuarios);
     }
