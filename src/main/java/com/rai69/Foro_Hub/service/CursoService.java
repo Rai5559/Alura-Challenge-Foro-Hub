@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.rai69.Foro_Hub.dto.CursoDTO;
+import com.rai69.Foro_Hub.exception.DuplicatedTopicException;
 import com.rai69.Foro_Hub.exception.EntityNotFoundException;
 import com.rai69.Foro_Hub.model.CursoModel;
 import com.rai69.Foro_Hub.repository.CursoRepository;
@@ -20,6 +21,10 @@ public class CursoService {
 
     @Transactional
     public CursoDTO crearCurso(CursoDTO cursoDTO) {
+        if (cursoRepository.findByNombreIgnoreCase(cursoDTO.nombre()).isPresent()) {
+            throw new DuplicatedTopicException("Ya existe un curso con el nombre: " + cursoDTO.nombre());
+        }
+        
         CursoModel curso = new CursoModel();
         curso.setNombre(cursoDTO.nombre());
         curso.setCategoria(cursoDTO.categoria());
@@ -42,6 +47,13 @@ public class CursoService {
     public CursoDTO actualizarCurso(CursoDTO cursoDTO) {
         CursoModel curso = cursoRepository.findById(cursoDTO.id())
             .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado con ID: " + cursoDTO.id()));
+
+        cursoRepository.findByNombreIgnoreCase(cursoDTO.nombre())
+            .ifPresent(cursoExistente -> {
+                if (!cursoExistente.getId().equals(cursoDTO.id())) {
+                    throw new DuplicatedTopicException("Ya existe otro curso con el nombre: " + cursoDTO.nombre());
+                }
+            });
 
         curso.setNombre(cursoDTO.nombre());
         curso.setCategoria(cursoDTO.categoria());
